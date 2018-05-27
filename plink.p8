@@ -666,8 +666,8 @@ function _draw()
  local x = cam_x*0.9
  x = x % 128
  local y=0
- mapdraw(16, 32, -x, y, 16, 16, 0)
- mapdraw(16, 32, 128-x, y, 16, 16, 0)
+--  mapdraw(16, 32, -x, y, 16, 16, 0)
+--  mapdraw(16, 32, 128-x, y, 16, 16, 0)
 
  --cam_y = mid(0,player.y*6-40,128)
  cam_y = 84
