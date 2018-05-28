@@ -48,13 +48,14 @@ end
 
 function make_arrow(x,y,d)
   arrow = make_actor(4,x,y, d)
-  arrow.dx = 1.5 * d;
-  arrow.dy = -0.1;
+  arrow.dx = 1 * d;
+  arrow.dy = -0.2;
   arrow.friction = 0.9
 end
 
 function make_moose(x,y)
   moose = make_actor(5, x, y, 1)
+  moose.fear = 0
   moose.w = 1
   moose.h = 1
   moose.ddy = 0.03
@@ -143,38 +144,6 @@ function clear_cel(x, y)
 end
 
 
-function move_spawns(x0, y0)
-  -- spawn stuff close to x0,y0
-  for y=0,32 do
-    for x=x0-10,x0+10 do
-      val = mget(x,y)
-      m = nil
-
-      -- pickup
-      if (fget(val, 5)) then
-        m = make_actor(2,x+0.5,y+1,1)
-        m.f0 = val
-        m.frame = val
-        if (fget(val,4)) then
-          m.ddy = 0 -- zero gravity
-        end
-      end
-
-      -- monster
-      if (fget(val, 3)) then
-        m = make_actor(3,x+0.5,y+1,-1)
-        m.f0=val
-        m.frame=val
-      end
-
-      -- clear cel if spawned something
-      if (m ~= nil) then
-        clear_cel(x,y)
-      end
-    end
-  end
-
-end
 
 -- test if a point is solid
 function solid (x, y)
@@ -268,51 +237,37 @@ function move_player(pl)
         end
       end
 
-function move_monster(m)
-  m.dx = m.dx + m.d * 0.02
-
-  m.f0 = (m.f0+abs(m.dx)*3+4) % 4
-  m.frame = 112 + flr(m.f0)
-
-  if (false and m.standing and rnd(100) < 1)
-  then
-    m.dy = -1
-  end
-
-end
 
 function move_moose(m)
-  if( abs(player.x - m.x)>10 and player.drawing<5 ) then
+  if( abs(player.x - m.x)<8 or player.drawing>5 ) then
+    m.fear = 100
+  else
+    m.fear = max(0, m.fear-1)
+  end  
+
+  if(m.fear==0) then
     m.dx = 0
     m.frame = 128
   else
     m.dx = m.dx + m.d * 0.02
-    m.f0 = (m.f0+abs(m.dx)*3+4) % 4
     c = sin( m.t* 0.05)
     mf = flr( (1+ c) * 2)
+    m.frame = 130 + mf*2
     if( c< -0.95 ) then
       m.dy = -0.2
       sfx(17)
     end
-    m.frame = 130 + mf*2
   end
 
 end
 
 function move_actor(pl)
-
-  -- to do: replace with callbacks
-
   if (pl.kind == 1) then
     move_player(pl)
   end
 
   if (pl.kind == 2) then
     move_pickup(pl)
-  end
-
-  if (pl.kind == 3) then
-    move_monster(pl)
   end
 
   if (pl.kind == 5) then
@@ -427,199 +382,157 @@ function move_actor(pl)
           pl.t = pl.t + 1
         end
 
-        function collide_event(a1, a2)
-          if(a1.kind==1) then
-            if(a2.kind==2) then
+  function collide_event(a1, a2)
+    if(a1.kind==1) then
+      if(a2.kind==2) then
 
-              if (a2.frame==64) then
-                a1.super = 120
-                a1.dx = a1.dx * 2
-                --a1.dy = a1.dy-0.1
-                -- a1.standing = false
-                sfx(13)
-              end
+        if (a2.frame==64) then
+          a1.super = 120
+          a1.dx = a1.dx * 2
+          --a1.dy = a1.dy-0.1
+          -- a1.standing = false
+          sfx(13)
+        end
+      end
+  
+  end
+end
 
-              -- gem
-              if (a2.frame==80) then
-                a1.score = a1.score + 1
-                sfx(9)
-              end
+function move_sparkle(sp)
+  if (sp.t > sp.max_t) then
+    del(sparkle,sp)
+  end
 
-              del(actor,a2)
-
-            end
-
-            -- dupe monster
-
-            if(a2.kind==3) then -- monster
-            if((a1.y-a1.dy) < a2.y-0.7) then
-              -- slow down player
-              a1.dx = a1.dx * 0.7
-              a1.dy = a1.dy * -0.7-- - 0.2
-
-              -- explode
-              for i=1,16 do
-                s=make_sparkle(
-                a2.x, a2.y-0.5, 96+rnd(3), 7)
-                s.dx = s.dx + rnd(0.4)-0.2
-                s.dy = s.dy + rnd(0.4)-0.2
-                s.max_t = 30
-                s.ddy = 0.01
-
-              end
-
-              -- kill monster
-              -- to do: in move_monster
-              sfx(14)
-              del(actor,a2)
-
-            else
-
-              -- player death
-              a1.life=0
+  sp.x = sp.x + sp.dx
+  sp.y = sp.y + sp.dy
+  sp.dy= sp.dy+ sp.ddy
+  sp.t = sp.t + 1
+end
 
 
-            end
+function collide(a1, a2)
+  if (a1==a2) then return end
+  local dx = a1.x - a2.x
+  local dy = a1.y - a2.y
+  if (abs(dx) < a1.w+a2.w) then
+    if (abs(dy) < a1.h+a2.h) then
+      collide_event(a1, a2)
+    end
+  end
+end
+
+function collisions()
+
+  for a1 in all(actor) do
+    collide(player,a1)
+  end
+
+end
+
+function outgame_logic()
+
+  if (death_t > 0) then
+    death_t = death_t + 1
+    if (death_t > 30 and
+    btn(4) or btn(5))
+    then
+      music(-1)
+      sfx(-1)
+      sfx(0)
+      dpal={0,1,1, 2,1,13,6,
+      4,4,9,3, 13,1,13,14}
+
+      -- palette fade
+      for i=0,40 do
+        for j=1,15 do
+          col = j
+          for k=1,((i+(j%5))/4) do
+            col=dpal[col]
           end
-
+          pal(j,col,1)
         end
+        flip()
       end
 
-      function move_sparkle(sp)
-        if (sp.t > sp.max_t) then
-          del(sparkle,sp)
-        end
+      -- restart cart end of slice
+      run()
+    end
+  end
+end
 
-        sp.x = sp.x + sp.dx
-        sp.y = sp.y + sp.dy
-        sp.dy= sp.dy+ sp.ddy
-        sp.t = sp.t + 1
-      end
+function _update()
 
+  foreach(actor, move_actor)
+  foreach(sparkle, move_sparkle)
+  collisions()
+  -- outgame_logic()
+  t=t+1
+end
 
-      function collide(a1, a2)
-        if (a1==a2) then return end
-        local dx = a1.x - a2.x
-        local dy = a1.y - a2.y
-        if (abs(dx) < a1.w+a2.w) then
-          if (abs(dy) < a1.h+a2.h) then
-            collide_event(a1, a2)
-          end
-        end
-      end
+function draw_sparkle(s)
 
-      function collisions()
+  if (s.col > 0) then
+    for i=1,15 do
+      pal(i,s.col)
+    end
+  end
 
-        for a1 in all(actor) do
-          collide(player,a1)
-        end
+  spr(s.frame, s.x*8-4, s.y*8-4)
 
-      end
+  pal()
+end
 
-      function outgame_logic()
+function draw_fire(pl)
+  pl.frame +=0.2
+  spr(64 + (pl.frame  % 4),
+  pl.x*8,
+  pl.y*8 ,
+  1, 1)
 
-        if (death_t > 0) then
-          death_t = death_t + 1
-          if (death_t > 30 and
-          btn(4) or btn(5))
-          then
-            music(-1)
-            sfx(-1)
-            sfx(0)
-            dpal={0,1,1, 2,1,13,6,
-            4,4,9,3, 13,1,13,14}
-
-            -- palette fade
-            for i=0,40 do
-              for j=1,15 do
-                col = j
-                for k=1,((i+(j%5))/4) do
-                  col=dpal[col]
-                end
-                pal(j,col,1)
-              end
-              flip()
-            end
-
-            -- restart cart end of slice
-            run()
-          end
-        end
-      end
-
-      function _update()
-
-        foreach(actor, move_actor)
-        foreach(sparkle, move_sparkle)
-        collisions()
-        move_spawns(player.x, player.y)
-
-        outgame_logic()
-        t=t+1
-      end
-
-      function draw_sparkle(s)
-
-        if (s.col > 0) then
-          for i=1,15 do
-            pal(i,s.col)
-          end
-        end
-
-        spr(s.frame, s.x*8-4, s.y*8-4)
-
-        pal()
-      end
-
-      function draw_fire(pl)
-        spr(64 + rnd(4),
-        pl.x*8,
-        pl.y*8 ,
-        1, 1)
-      end
+end
 
 
-      function draw_arrow(a)
-        x = a.x * 8
-        y = a.y * 8
-        dir = {}
-        dir.x = a.dx
-        dir.y = a.dy
-        dir = norm(dir)
-        for i=-2,2 do
-          pset(
-          x + i * dir.x,
-          y + i * dir.y,
-          9)
-        end
+function draw_arrow(a)
+  x = a.x * 8
+  y = a.y * 8
+  dir = {}
+  dir.x = a.dx
+  dir.y = a.dy
+  dir = norm(dir)
+  for i=-2,2 do
+    pset(
+    x + i * dir.x,
+    y + i * dir.y,
+    9)
+  end
 
-      end
+end
 
-      function draw_actor(pl)
+function draw_actor(pl)
 
-        if (pl.pal ~= nil) then
-          for i=1,15 do
-            pal(i, pl.pal[i])
-          end
-        end
+  if (pl.pal ~= nil) then
+    for i=1,15 do
+      pal(i, pl.pal[i])
+    end
+  end
 
-        if (pl.kind == 4) then
-          draw_arrow(pl)
-          return
-        end
+  if (pl.kind == 4) then
+    draw_arrow(pl)
+    return
+  end
 
-        if (pl.kind ==5 )then
-          spr(pl.frame,
-          pl.x*8, pl.y*8-16,
-          2, 2, pl.d < 0)
-          return
-        end
+  if (pl.kind ==5 )then
+    spr(pl.frame,
+    pl.x*8, pl.y*8-16,
+    2, 2, pl.d < 0)
+    return
+  end
 
-        spr(pl.frame,
-        pl.x*8-4, pl.y*8-8,
-        1, 1, pl.d < 0)
-        pal()
-      end
+  spr(pl.frame,
+  pl.x*8-4, pl.y*8-8,
+  1, 1, pl.d < 0)
+  pal()
+end
 
 function _draw()
 
@@ -636,7 +549,7 @@ function _draw()
     -- sky gradient
     for y=0,127 do
       col=sget(player.x,(y+(y%4)*6) / 16)
-      line(0,y,127,y,col)
+      -- line(0,y,127,y,col)
     end
     --  end
 
