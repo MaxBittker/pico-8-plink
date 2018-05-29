@@ -744,7 +744,7 @@ function _draw()
 
     if (postmoon) then
       cursor(0,2)
-      print("fin")
+      print("fin.")
       -- print("actors:"..count(actor))
       -- print("cam:"..cam_x/8)
       -- print(stat(1))
