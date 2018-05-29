@@ -639,9 +639,9 @@ function _draw()
     rectfill (0,0,127,127,0)
     color(7)
     -- cursor (5,5)
-    print("you are InCH the hunter",
+    print("you are inch the hunter",
       18-1,10-0,8+(t/4)%2)
-    print("hold X to draw your bow",
+    print("hold x to draw your bow",
       18-1,25-0,8+(t/4)%2)
   return 
   end
@@ -652,7 +652,7 @@ function _draw()
     player.x = 5
     player.y = 12
     
-    moose.y = 15
+    moose.y = 12
     level +=1
       for a in all(actor) do
         if a.kind ==4 then
@@ -742,11 +742,12 @@ function _draw()
     --   18,10,7)
     -- end
 
-    if (false) then
+    if (postmoon) then
       cursor(0,2)
-      print("actors:"..count(actor))
-      print("cam:"..cam_x/8)
-      print(stat(1))
+      print("fin")
+      -- print("actors:"..count(actor))
+      -- print("cam:"..cam_x/8)
+      -- print(stat(1))
     end
   end
 
@@ -779,14 +780,14 @@ fffdddfdfffd5dfffffffffffdff5dfddfdfdfdf0056500000055220fdffdd5dfdffddfd0ffdfdff
 fddfdfdfdfffdfdfdfdfdfdfdddffffffffd5ddd0056550000555220dddffff5dddffffffdffffffff544444ffffffffff1fffffffffffff0004000400404044
 fffdfdfd5dfdfffffffffdffffddfdfddfdfdfdf0055550005dd522299ddfd5d99ddfdfdffffdffdff5ff44fff1fffffff1ffff4ffffffff0000400040440040
 dfffd5dfddd5dfdfdfdfdfdddfdfdfdffdfffdfd005555005dd55552d9d9d9d9d9d9d9d9ffddffdffdddffffff1ffff4444444444f1fffff0004404040400440
-fd9d9dfdfffdfffdff9dfffdfdddfdfdfdddddfd00030000fd5d55fdfffdfffdfdddddfdfffff000555551f1dddddddddd1f15111f115d110400400444444440
+fd9d9dfdfffdfffdff5dfffdfdddfdfdfdddddfd00030000fd5d55fdfffdfffdfdddddfdfffff000555551f1dddddddddd1f15111f115d110400400444444440
 dddfddfffdffffffffdfffdfddddffffdddfddff03030000dddf55ffffffffffdddfd5ffffffdff0fffff5fffffff5fffffff5ffff115dff0440404044500400
-fd9d9dddfffdffffffffddfffffffffdfdddd55d03033003fd5d5555fdffdfdffd5dddddfdfffff0fffff5fffffff5fffffff51fffff5dff0004444444404000
-d9dfd9d9dfdfdfdfdfdffff9dfffffffdddf555d00333003d5df5555ffffffffd5dfddd5fffffff0fff1f1fffffff5fffffff5ffffff5dff0400444444504444
-fdffddfdfffffdfdfffffffdfffffffffdffddfd00333030f5ff55fdfffffdfffdffddfddffdffffdddd101f555dd1f1dddf11dd555151110040040444444400
+fd9d9dddfffdffffffffd9fffffffffdfdddd55d03033003fd5d5555fdffdfdffd5dddddfdfffff0fffff5fffffff5fffffff51fffff5dff0004444444404000
+d9dfd9d9dfdfdfdfdfd99ffddfffffffdddf555d00333003d5df5555ffffffffd5dfddd5fffffff0fff1f1fffffff5fffffff5ffffff5dff0400444444504444
+fdffddfdfffffdfdff99fffdfffffffffdffddfd00333030f5ff55fdfffffdfffdffddfddffdffffdddd101f555dd1f1dddf11dd555151110040040444444400
 dddfffffffffd5ffffdfdfffddfdffffdddffffd30033030555ffffffdfddddfdddddfffffffffffff1f444fff14444fff5f444444ffffff0440440444044000
-99ddfdfdfffdfdfd99fffdfdfffffffd55ddfdfd330330305555fdfdffffdddfddddfdfdffdffffdff1fffffff1fffffff5fffffff1fffff0044400440404000
-d9d9d9d9dffffff9d9ffdddfffffffdf555ddddd33033030d55555d5dfffddd9ddd5d5ddffdffdffff1fffffff1fffffff5fffffff1fffff0040444544404000
+99ddfdfdfffdfdfdddfffdfdfffffffd55ddfdfd330330305555fdfdffffdddfddddfdfdffdffffdff1fffffff1fffffff5fffffff1fffff0044400440404000
+d9d9d9d9dffffff9ddffd5dfffffffdf555ddddd33033030d55555d5dfffddd9ddd5d5ddffdffdffff1fffffff1fffffff5fffffff1fffff0040444544404000
 00000000000000000000000000000000003333000000000000000000000000000000000000000000000000000000000000000000003333000040445404444400
 00080000000800000000080000000800033333500000000000000000000000000000000000000000000000000000000000000000033333500000000000000000
 00080800000880000000880000008800036333500000000000000000000000000000000000000000000000000000000000000000036333500000000000000000
